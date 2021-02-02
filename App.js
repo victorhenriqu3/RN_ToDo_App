@@ -9,6 +9,8 @@ import {
   StatusBar,
   Modal,
   TextInput,
+  BackHandler,
+  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Animatable from "react-native-animatable";
@@ -22,46 +24,68 @@ export default function App() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState(" ");
 
-//Busacando Tarefas ao iniciar o APP
-  useEffect(()=>{
-    async function loadTasks(){
-      const taskStorage = await AsyncStorage.getItem('@task');
-      if(taskStorage){
+  //Utilizando o Botão de Voltar nativo do aparelho
+  useEffect(() => {
+    const backAction = () => {
+      Alert.alert("Tem Certeza?", "Você irá sair do aplicativo.", [
+        {
+          text: "Não",
+          onPress: () => null,
+          style: "cancel",
+        },
+        { text: "Sim", onPress: () => BackHandler.exitApp() },
+      ]);
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
+  //Busacando Tarefas ao iniciar o APP
+  useEffect(() => {
+    async function loadTasks() {
+      const taskStorage = await AsyncStorage.getItem("@task");
+      if (taskStorage) {
         SetTask(JSON.parse(taskStorage));
       }
     }
     loadTasks();
-  },[]);
+  }, []);
 
-//Salvando tarefas alteradas
-  useEffect(()=>{
-    async function saveTasks(){
-      await AsyncStorage.setItem('@task', JSON.stringify(task));
+  //Salvando tarefas alteradas
+  useEffect(() => {
+    async function saveTasks() {
+      await AsyncStorage.setItem("@task", JSON.stringify(task));
     }
     saveTasks();
-  },[task]);
+  }, [task]);
 
-  function handleAdd(){
-    if(input==='') return;
+  function handleAdd() {
+    if (input === "") return;
 
     const data = {
       key: input,
-      task: input
+      task: input,
     };
 
     SetTask([...task, data]);
     setOpen(false);
-    setInput('');
+    setInput("");
   }
 
-  const handleDelete = useCallback((data)=>{
-    const find = task.filter(r => r.key !== data.key);
+  const handleDelete = useCallback((data) => {
+    const find = task.filter((r) => r.key !== data.key);
     SetTask(find);
   });
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#171d31" barStyle="light-content" />
+      <StatusBar backgroundColor="#404040" barStyle="light-content" />
 
       <View styles={styles.content}>
         <Text style={styles.title}>Tarefas</Text>
@@ -72,45 +96,52 @@ export default function App() {
         showsHorizontalScrollIndicator={false}
         data={task}
         keyExtractor={(item) => String(item.key)}
-        renderItem={({ item }) => <TaskList data={item} handleDelete={handleDelete} />}
+        renderItem={({ item }) => (
+          <TaskList data={item} handleDelete={handleDelete} />
+        )}
       />
 
       <Modal animationType="slide" transparent={false} visible={open}>
         <SafeAreaView style={styles.modal}>
           <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={ ()=> setOpen(false)}>
-              <Ionicons style={{marginLeft: 5, marginRight: 5}} name="md-arrow-back" size={40} color="#fff" />
+            <TouchableOpacity onPress={() => setOpen(false)}>
+              <Ionicons
+                style={{ marginLeft: 5, marginRight: 5 }}
+                name="md-arrow-back"
+                size={40}
+                color="#fff"
+              />
             </TouchableOpacity>
             <Text style={styles.modalTitle}> Nova Tarefa </Text>
           </View>
 
-          <Animatable.View 
-          style={styles.modalBody}
-          animation='fadeInUp'
-          useNativeDriver
+          <Animatable.View
+            style={styles.modalBody}
+            animation="fadeInUp"
+            useNativeDriver
           >
             <TextInput
-            multiline={true}
-            placeholder="O que vamos fazer hoje?"
-            style={styles.input}
-            value={input}
-            onChangeText={(text)=>setInput(text)}
+              multiline={true}
+              placeholder="O que vamos fazer hoje?"
+              style={styles.input}
+              value={input}
+              onChangeText={(text) => setInput(text)}
             />
             <TouchableOpacity style={styles.handleAdd} onPress={handleAdd}>
               <Text style={styles.handleAddText}>Cadastrar</Text>
             </TouchableOpacity>
           </Animatable.View>
-
         </SafeAreaView>
       </Modal>
 
-      <AnimateBtn 
-      style={styles.fab}
-      useNativeDriver
-      animation="bounceInUp"
-      duration={1500}
-      onPress={ ()=> setOpen(true) }>
-        <Ionicons name="ios-add" size={35} color="#FFF" />
+      <AnimateBtn
+        style={styles.fab}
+        useNativeDriver
+        animation="bounceInUp"
+        duration={1500}
+        onPress={() => setOpen(true)}
+      >
+        <Ionicons name="ios-add" size={35} color="#FFFFFD" />
       </AnimateBtn>
     </SafeAreaView>
   );
@@ -119,10 +150,10 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#171d31",
+    backgroundColor: "#404040",
   },
   title: {
-    color: "#FFF",
+    color: "#FFFFFD",
     fontSize: 25,
     textAlign: "center",
     paddingTop: 10,
@@ -133,7 +164,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: 60,
     height: 60,
-    backgroundColor: "#0094FF",
+    backgroundColor: "#17C774",
     justifyContent: "center",
     borderRadius: 30,
     bottom: 25,
@@ -147,25 +178,25 @@ const styles = StyleSheet.create({
       height: 3,
     },
   },
-  modal:{
+  modal: {
     flex: 1,
-    backgroundColor: "#171d31",
+    backgroundColor: "#404040",
   },
-  modalHeader:{
+  modalHeader: {
     marginLeft: 10,
     marginTop: 20,
-    flexDirection: 'row',
-    alignItems: 'center'
+    flexDirection: "row",
+    alignItems: "center",
   },
-  modalTitle:{
+  modalTitle: {
     marginLeft: 15,
     fontSize: 25,
-    color: "#fff",
+    color: "#FFFFFD",
   },
-  modalBody:{
+  modalBody: {
     marginTop: 15,
   },
-  input:{
+  input: {
     fontSize: 15,
     marginLeft: 10,
     marginRight: 10,
@@ -173,22 +204,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 9,
     height: 85,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
     color: "#000",
     borderRadius: 10,
   },
-  handleAdd:{
-    backgroundColor: "#0094FF",
+  handleAdd: {
+    backgroundColor: "#17C774",
     marginTop: 10,
     marginRight: 10,
     marginLeft: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     height: 40,
     borderRadius: 5,
   },
-  handleAddText:{
+  handleAddText: {
     color: "#fff",
     fontSize: 15,
-  }
+  },
 });
