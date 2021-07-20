@@ -1,0 +1,3 @@
+ports:
+  - port: 19002-30000
+    onOpen: ignore

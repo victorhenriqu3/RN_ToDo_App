@@ -27,7 +27,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#404040"
-      }
+      },
+      "package": "com.v1ctor_henriqu3.tasksapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
