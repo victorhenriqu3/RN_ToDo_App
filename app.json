@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Task App",
-    "slug": "Task App",
+    "slug": "TaskApp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
